@@ -120,7 +120,7 @@ def search(query, results=10, suggestion=False):
 
 
 @cache
-def geosearch(latitude, longitude, title=None, results=10, radius=1000):
+def geosearch(latitude, longitude, title=None, results=10, radius=1000, feature_type=None):
   '''
   Do a wikipedia geo search for `latitude` and `longitude`
   using HTTP API described in http://www.mediawiki.org/wiki/Extension:GeoData
@@ -141,7 +141,8 @@ def geosearch(latitude, longitude, title=None, results=10, radius=1000):
     'list': 'geosearch',
     'gsradius': radius,
     'gscoord': '{0}|{1}'.format(latitude, longitude),
-    'gslimit': results
+    'gslimit': results,
+    'gsprop': 'type'
   }
   if title:
     search_params['titles'] = title
@@ -159,7 +160,9 @@ def geosearch(latitude, longitude, title=None, results=10, radius=1000):
     search_results = (v['title'] for k, v in search_pages.items() if k != '-1')
   else:
     search_results = (d['title'] for d in raw_results['query']['geosearch'])
-
+    if feature_type:
+        search_results = [x['title'] for x in raw_results['query']['geosearch'] if x['type'] == feature_type]
+    
   return list(search_results)
 
 
